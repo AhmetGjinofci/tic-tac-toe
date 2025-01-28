@@ -5,7 +5,7 @@ public class PlayerUI : MonoBehaviour
 
     [SerializeField] private GameObject crossArrowGameObject;
     [SerializeField] private GameObject circleArrowGameObject;
-    [SerializeField] private GameObject crossTouTextGameObject;
+    [SerializeField] private GameObject crossYouTextGameObject;
     [SerializeField] private GameObject circleYouTextGameObject;
 
 
@@ -14,7 +14,7 @@ public class PlayerUI : MonoBehaviour
     {
         crossArrowGameObject.SetActive(false);
         circleArrowGameObject.SetActive(false);
-        crossTouTextGameObject.SetActive(false);
+        crossYouTextGameObject.SetActive(false);
         circleYouTextGameObject.SetActive(false);
     }
 
@@ -35,7 +35,7 @@ public class PlayerUI : MonoBehaviour
     {
         if(GameManager.Instance.GetLocalPlayerType() == GameManager.PlayerType.Cross)
         {
-            crossTouTextGameObject.SetActive(true);
+            crossYouTextGameObject.SetActive(true);
         }
         else
         {

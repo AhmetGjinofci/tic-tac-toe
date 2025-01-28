@@ -68,7 +68,7 @@ public class GameManager : NetworkBehaviour
             OnCurrentPlayablePlayerTypeChanged?.Invoke(this, EventArgs.Empty);
         };
 
-    }
+    }     
 
 
     private void NetworkManager_OnClientConnectedCallback(ulong obj)
@@ -117,7 +117,6 @@ public class GameManager : NetworkBehaviour
         }
 
     }
-
 
 
     public PlayerType GetLocalPlayerType()
