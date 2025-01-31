@@ -28,6 +28,7 @@ public class GameManager : NetworkBehaviour
     public event EventHandler OnCurrentPlayablePlayerTypeChanged;
     public event EventHandler OnRematch;
     public event EventHandler OnGameTied;
+    public event EventHandler OnScoreChanged;
 
 
 
@@ -59,10 +60,10 @@ public class GameManager : NetworkBehaviour
 
     private PlayerType localPlayerType;
     private NetworkVariable<PlayerType> currentPlayablePlayerType = new NetworkVariable<PlayerType>();
-    public NetworkVariable<int> playerCrossScore = new NetworkVariable<int>(0);
-    public NetworkVariable<int> playerCircleScore = new NetworkVariable<int>(0);
     private PlayerType[,] playerTypeArray;
     private List<Line> lineList;
+    private NetworkVariable<int> playerCrossScore = new NetworkVariable<int>();
+    private NetworkVariable<int> playerCircleScore = new NetworkVariable<int>();
 
 
 
@@ -156,6 +157,16 @@ public class GameManager : NetworkBehaviour
         currentPlayablePlayerType.OnValueChanged += (PlayerType oldPlayerType, PlayerType newPlayerType) =>
         {
             OnCurrentPlayablePlayerTypeChanged?.Invoke(this, EventArgs.Empty);
+        };
+
+
+        playerCrossScore.OnValueChanged += (int prevScore, int newScore) =>
+        {
+            OnScoreChanged?.Invoke(this, EventArgs.Empty);
+        };
+        playerCircleScore.OnValueChanged += (int prevScore, int newScore) =>
+        {
+            OnScoreChanged?.Invoke(this, EventArgs.Empty);
         };
 
     }     
@@ -338,4 +349,9 @@ public class GameManager : NetworkBehaviour
         return currentPlayablePlayerType.Value;
     }
 
+    public void GetScores(out int playerCrossScore, out int playerCircleScore)
+    {
+        playerCrossScore = this.playerCrossScore.Value;
+        playerCircleScore = this.playerCircleScore.Value;
+    }
 }
