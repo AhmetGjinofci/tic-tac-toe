@@ -3631,6 +3631,7 @@ MonoBehaviour:
   resultTextMesh: {fileID: 202355248}
   winColor: {r: 0.11372549, g: 1, b: 0, a: 1}
   loseColor: {r: 1, g: 0.34117648, b: 0, a: 1}
+  tieColor: {r: 0.5019608, g: 0.5019608, b: 0.5019608, a: 1}
   rematchButton: {fileID: 306288062}
 --- !u!1001 &8234578819030101093
 PrefabInstance:

@@ -27,6 +27,7 @@ public class GameManager : NetworkBehaviour
     }
     public event EventHandler OnCurrentPlayablePlayerTypeChanged;
     public event EventHandler OnRematch;
+    public event EventHandler OnGameTied;
 
 
 
@@ -58,6 +59,8 @@ public class GameManager : NetworkBehaviour
 
     private PlayerType localPlayerType;
     private NetworkVariable<PlayerType> currentPlayablePlayerType = new NetworkVariable<PlayerType>();
+    public NetworkVariable<int> playerCrossScore = new NetworkVariable<int>(0);
+    public NetworkVariable<int> playerCircleScore = new NetworkVariable<int>(0);
     private PlayerType[,] playerTypeArray;
     private List<Line> lineList;
 
@@ -244,11 +247,49 @@ public class GameManager : NetworkBehaviour
                 //Win
                 Debug.Log("Winner!");
                 currentPlayablePlayerType.Value = PlayerType.None;
-                TriggerOnGameWinRpc(i, playerTypeArray[line.centerGridPosition.x, line.centerGridPosition.y]);
-                break;
+                PlayerType winPlayerType = playerTypeArray[line.centerGridPosition.x, line.centerGridPosition.y];
+                switch (winPlayerType)
+                {
+                    case PlayerType.Cross:
+                        playerCrossScore.Value++;
+                        break;
+                    case PlayerType.Circle:
+                        playerCircleScore.Value++;
+                        break;
+                }
+                TriggerOnGameWinRpc(i, winPlayerType);
+                return;
             }
         }
+
+
+        bool hasTie = true;
+        for(int x = 0; x < playerTypeArray.GetLength(0); x++)
+        {
+            for(int y = 0; y < playerTypeArray.GetLength(1); y++)
+            {
+                if(playerTypeArray[x, y] == PlayerType.None)
+                {
+                    hasTie = false;
+                    break;
+                }
+            }
+        }
+
+        if (hasTie)
+        {
+            TriggerOnGameTiedRpc();
+        }
     }
+
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void TriggerOnGameTiedRpc()
+    {
+        OnGameTied?.Invoke(this, EventArgs.Empty);
+    }
+
+
 
     [Rpc(SendTo.ClientsAndHost)]
     private void TriggerOnGameWinRpc(int lineIndex, PlayerType winPlayerType)
