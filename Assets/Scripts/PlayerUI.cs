@@ -29,7 +29,7 @@ public class PlayerUI : MonoBehaviour
     private void Start()
     {
         GameManager.Instance.OnGameStarted += GameManager_OnGameStarted;
-        GameManager.Instance.OnCurrentPlayablePlayerTypeChanged += GameManager_OnCurrentPlayablePlayerTypeChanged;
+        GameManager.Instance.OnCurrentPlayablePlayerTypeChanged += GameManager_OnCurrentPlayablePlayerTypeChanged; 
         GameManager.Instance.OnScoreChanged += GameManager_OnScoreChanged;
 
     }
