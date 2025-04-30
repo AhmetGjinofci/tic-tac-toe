@@ -16,12 +16,12 @@ public class LobbyUI : MonoBehaviour {
     [SerializeField] private Transform container;
     [SerializeField] private TextMeshProUGUI lobbyNameText;
     [SerializeField] private TextMeshProUGUI playerCountText;
-    [SerializeField] private TextMeshProUGUI gameModeText;
-    [SerializeField] private Button changeMarineButton;
-    [SerializeField] private Button changeNinjaButton;
-    [SerializeField] private Button changeZombieButton;
+    //[SerializeField] private TextMeshProUGUI gameModeText;
+    //[SerializeField] private Button changeMarineButton;
+    //[SerializeField] private Button changeNinjaButton;
+    //[SerializeField] private Button changeZombieButton;
     [SerializeField] private Button leaveLobbyButton;
-    [SerializeField] private Button changeGameModeButton;
+    //[SerializeField] private Button changeGameModeButton;
 
 
     private void Awake() {
@@ -29,23 +29,23 @@ public class LobbyUI : MonoBehaviour {
 
         playerSingleTemplate.gameObject.SetActive(false);
 
-        changeMarineButton.onClick.AddListener(() => {
-            LobbyManager.Instance.UpdatePlayerCharacter(LobbyManager.PlayerCharacter.Marine);
-        });
-        changeNinjaButton.onClick.AddListener(() => {
-            LobbyManager.Instance.UpdatePlayerCharacter(LobbyManager.PlayerCharacter.Ninja);
-        });
-        changeZombieButton.onClick.AddListener(() => {
-            LobbyManager.Instance.UpdatePlayerCharacter(LobbyManager.PlayerCharacter.Zombie);
-        });
+        //changeMarineButton.onClick.AddListener(() => {
+        //    LobbyManager.Instance.UpdatePlayerCharacter(LobbyManager.PlayerCharacter.Marine);
+        //});
+        //changeNinjaButton.onClick.AddListener(() => {
+        //    LobbyManager.Instance.UpdatePlayerCharacter(LobbyManager.PlayerCharacter.Ninja);
+        //});
+        //changeZombieButton.onClick.AddListener(() => {
+        //    LobbyManager.Instance.UpdatePlayerCharacter(LobbyManager.PlayerCharacter.Zombie);
+        //});
 
         leaveLobbyButton.onClick.AddListener(() => {
             LobbyManager.Instance.LeaveLobby();
         });
 
-        changeGameModeButton.onClick.AddListener(() => {
-            LobbyManager.Instance.ChangeGameMode();
-        });
+        //changeGameModeButton.onClick.AddListener(() => {
+        //    LobbyManager.Instance.ChangeGameMode();
+        //});
     }
 
     private void Start() {
@@ -54,9 +54,25 @@ public class LobbyUI : MonoBehaviour {
         LobbyManager.Instance.OnLobbyGameModeChanged += UpdateLobby_Event;
         LobbyManager.Instance.OnLeftLobby += LobbyManager_OnLeftLobby;
         LobbyManager.Instance.OnKickedFromLobby += LobbyManager_OnLeftLobby;
+        
 
         Hide();
     }
+
+    private void OnDestroy()
+    {
+        // unsubscribe so we stop getting events once this UI is torn down
+        if (LobbyManager.Instance != null)
+        {
+            LobbyManager.Instance.OnJoinedLobby -= UpdateLobby_Event;
+            LobbyManager.Instance.OnJoinedLobbyUpdate -= UpdateLobby_Event;
+            LobbyManager.Instance.OnLobbyGameModeChanged -= UpdateLobby_Event;
+            LobbyManager.Instance.OnLeftLobby -= LobbyManager_OnLeftLobby;
+            LobbyManager.Instance.OnKickedFromLobby -= LobbyManager_OnLeftLobby;
+        }
+    }
+
+
 
     private void LobbyManager_OnLeftLobby(object sender, System.EventArgs e) {
         ClearLobby();
@@ -87,18 +103,23 @@ public class LobbyUI : MonoBehaviour {
             lobbyPlayerSingleUI.UpdatePlayer(player);
         }
 
-        changeGameModeButton.gameObject.SetActive(LobbyManager.Instance.IsLobbyHost());
+        //changeGameModeButton.gameObject.SetActive(LobbyManager.Instance.IsLobbyHost());
 
         lobbyNameText.text = lobby.Name;
         playerCountText.text = lobby.Players.Count + "/" + lobby.MaxPlayers;
-        gameModeText.text = lobby.Data[LobbyManager.KEY_GAME_MODE].Value;
+        //gameModeText.text = lobby.Data[LobbyManager.KEY_GAME_MODE].Value;
 
         Show();
     }
 
     private void ClearLobby() {
-        foreach (Transform child in container) {
-            if (child == playerSingleTemplate) continue;
+        // iterate backwards so removing children doesn't shift the others you still need to process
+        for (int i = container.childCount - 1; i >= 0; i--)
+        {
+            var child = container.GetChild(i);
+            // don’t destroy the template itself
+            if (child.gameObject == playerSingleTemplate.gameObject)
+                continue;
             Destroy(child.gameObject);
         }
     }

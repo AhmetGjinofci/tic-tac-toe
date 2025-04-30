@@ -10,6 +10,7 @@ public class GameOverUI : MonoBehaviour
     [SerializeField] private Color loseColor;
     [SerializeField] private Color tieColor;
     [SerializeField] private Button rematchButton;
+    [SerializeField] private Button quitButton;
 
 
 
@@ -17,6 +18,15 @@ public class GameOverUI : MonoBehaviour
     {
         rematchButton.onClick.AddListener(() => {
             GameManager.Instance.RematchRpc();
+        });
+
+
+        quitButton.onClick.AddListener(() =>
+        {
+            Application.Quit();
+            #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+            #endif
         });
     }
 

@@ -13,12 +13,12 @@ public class LobbyCreateUI : MonoBehaviour {
     [SerializeField] private Button createButton;
     [SerializeField] private Button lobbyNameButton;
     [SerializeField] private Button publicPrivateButton;
-    [SerializeField] private Button maxPlayersButton;
-    [SerializeField] private Button gameModeButton;
+    //[SerializeField] private Button maxPlayersButton;
+    //[SerializeField] private Button gameModeButton;
     [SerializeField] private TextMeshProUGUI lobbyNameText;
     [SerializeField] private TextMeshProUGUI publicPrivateText;
-    [SerializeField] private TextMeshProUGUI maxPlayersText;
-    [SerializeField] private TextMeshProUGUI gameModeText;
+    //[SerializeField] private TextMeshProUGUI maxPlayersText;
+    //[SerializeField] private TextMeshProUGUI gameModeText;
 
 
     private string lobbyName;
@@ -55,29 +55,29 @@ public class LobbyCreateUI : MonoBehaviour {
             UpdateText();
         });
 
-        maxPlayersButton.onClick.AddListener(() => {
-            UI_InputWindow.Show_Static("Max Players", maxPlayers,
-            () => {
-                // Cancel
-            },
-            (int maxPlayers) => {
-                this.maxPlayers = maxPlayers;
-                UpdateText();
-            });
-        });
+        //maxPlayersButton.onClick.AddListener(() => {
+        //    UI_InputWindow.Show_Static("Max Players", maxPlayers,
+        //    () => {
+        //        // Cancel
+        //    },
+        //    (int maxPlayers) => {
+        //        this.maxPlayers = maxPlayers;
+        //        UpdateText();
+        //    });
+        //});
 
-        gameModeButton.onClick.AddListener(() => {
-            switch (gameMode) {
-                default:
-                case LobbyManager.GameMode.CaptureTheFlag:
-                    gameMode = LobbyManager.GameMode.Conquest;
-                    break;
-                case LobbyManager.GameMode.Conquest:
-                    gameMode = LobbyManager.GameMode.CaptureTheFlag;
-                    break;
-            }
-            UpdateText();
-        });
+        //gameModeButton.onClick.AddListener(() => {
+        //    switch (gameMode) {
+        //        default:
+        //        case LobbyManager.GameMode.CaptureTheFlag:
+        //            gameMode = LobbyManager.GameMode.Conquest;
+        //            break;
+        //        case LobbyManager.GameMode.Conquest:
+        //            gameMode = LobbyManager.GameMode.CaptureTheFlag;
+        //            break;
+        //    }
+        //    UpdateText();
+        //});
 
         Hide();
     }
@@ -85,8 +85,8 @@ public class LobbyCreateUI : MonoBehaviour {
     private void UpdateText() {
         lobbyNameText.text = lobbyName;
         publicPrivateText.text = isPrivate ? "Private" : "Public";
-        maxPlayersText.text = maxPlayers.ToString();
-        gameModeText.text = gameMode.ToString();
+        //maxPlayersText.text = maxPlayers.ToString();
+        //gameModeText.text = gameMode.ToString();
     }
 
     private void Hide() {

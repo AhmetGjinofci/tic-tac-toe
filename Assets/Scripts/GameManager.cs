@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
+
 public class GameManager : NetworkBehaviour
 {
 
     public static GameManager Instance { get; private set; }
 
-
+    
     public event EventHandler<OnClickedOnGridPositionEventArgs> OnClickedOnGridPosition;
     public class OnClickedOnGridPositionEventArgs : EventArgs
     {
@@ -65,6 +66,7 @@ public class GameManager : NetworkBehaviour
     private List<Line> lineList;
     private NetworkVariable<int> playerCrossScore = new NetworkVariable<int>();
     private NetworkVariable<int> playerCircleScore = new NetworkVariable<int>();
+    private bool hasStarted = false;
 
 
 
@@ -139,25 +141,20 @@ public class GameManager : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        Debug.Log("OnNetworkSpawn: " + NetworkManager.Singleton.LocalClientId);
+        Debug.Log($"[GameManager] OnNetworkSpawn — am I server? {IsServer}, ClientId={NetworkManager.Singleton.LocalClientId}");
 
-        if(NetworkManager.Singleton.LocalClientId == 0)
-        {
-            localPlayerType = PlayerType.Cross;
-        }
-        else
-        {
-            localPlayerType = PlayerType.Circle;
-        }
+
+        localPlayerType = (IsServer ? PlayerType.Cross : PlayerType.Circle);
 
         if (IsServer)
         {
-            NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_OnClientConnectedCallback;
+            //NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_OnClientConnectedCallback;
+            StartCoroutine(WaitForTwoClientsAndStart());
         }
 
         currentPlayablePlayerType.OnValueChanged += (PlayerType oldPlayerType, PlayerType newPlayerType) =>
         {
-            OnCurrentPlayablePlayerTypeChanged?.Invoke(this, EventArgs.Empty);
+            OnCurrentPlayablePlayerTypeChanged?.Invoke(this, EventArgs.Empty);  
         };
 
 
@@ -170,19 +167,23 @@ public class GameManager : NetworkBehaviour
             OnScoreChanged?.Invoke(this, EventArgs.Empty);
         };
 
-    }     
+    }
 
-
-    private void NetworkManager_OnClientConnectedCallback(ulong obj)
+    private System.Collections.IEnumerator WaitForTwoClientsAndStart()
     {
-        if (NetworkManager.Singleton.ConnectedClientsList.Count == 2)
+        // Wait until exactly two players are connected AND this NetworkObject is fully spawned.
+        yield return new WaitUntil(() =>
+            NetworkManager.Singleton.ConnectedClientsList.Count == 2
+            && NetworkObject.IsSpawned
+        );
+
+        if (!hasStarted)
         {
-            //Start Game
+            hasStarted = true;
             currentPlayablePlayerType.Value = PlayerType.Cross;
             TriggerOnGameStartedRpc();
         }
     }
-
 
     [Rpc(SendTo.ClientsAndHost)]
     private void TriggerOnGameStartedRpc()
@@ -339,6 +340,7 @@ public class GameManager : NetworkBehaviour
         currentPlayablePlayerType.Value = PlayerType.Cross;
 
         TriggerOnRematchRpc();
+        TriggerOnGameStartedRpc();
     }
 
 

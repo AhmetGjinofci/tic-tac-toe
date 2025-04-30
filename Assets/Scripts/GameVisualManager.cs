@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using static GameManager;
 
 public class GameVisualManager : NetworkBehaviour
 {
@@ -28,17 +30,22 @@ public class GameVisualManager : NetworkBehaviour
         GameManager.Instance.OnRematch += GameManager_OnRematch;
     }
 
-    private void GameManager_OnRematch(object sender, System.EventArgs e)
+    private void OnDestroy()
     {
-        if (!NetworkManager.Singleton.IsServer)
+        if (GameManager.Instance != null)
         {
-            return;
+            GameManager.Instance.OnClickedOnGridPosition -= GameManager_OnClickedOnGridPosition;
+            GameManager.Instance.OnGameWin -= GameManager_OnGameWin;
+            GameManager.Instance.OnRematch -= GameManager_OnRematch;
         }
+    }
 
-        foreach (GameObject visualGameObject in visualGameObjectList)
-        {
-            Destroy(visualGameObject);
-        }
+
+    private void GameManager_OnRematch(object sender, EventArgs e)
+    {
+        // destroy all the old X’s and O’s
+        foreach (var go in visualGameObjectList)
+            Destroy(go);
         visualGameObjectList.Clear();
     }
 
@@ -70,34 +77,46 @@ public class GameVisualManager : NetworkBehaviour
         visualGameObjectList.Add(lineCompleteTransform.gameObject);
     }
 
-    private void GameManager_OnClickedOnGridPosition(object sender, GameManager.OnClickedOnGridPositionEventArgs e)
+    private void GameManager_OnClickedOnGridPosition(object sender, OnClickedOnGridPositionEventArgs e)
     {
-        Debug.Log("GameManager_OnClickedOnGridPosition");
-        SpawnObjectRpc(e.x, e.y, e.playerType);
+        if (!IsServer) return;               // server only
+
+        var prefab = (e.playerType == GameManager.PlayerType.Cross)
+                     ? crossPrefab
+                     : circlePrefab;
+
+        var worldPos = GetGridWorldPosition(e.x, e.y);
+        var instance = Instantiate(prefab, worldPos, Quaternion.identity);
+
+        // tell Netcode about it
+        instance.GetComponent<NetworkObject>().Spawn();
+
+        // **track it** so we can destroy it on rematch
+        visualGameObjectList.Add(instance.gameObject);
     }
 
 
-    [Rpc(SendTo.Server)]
-    private void SpawnObjectRpc(int x, int y, GameManager.PlayerType playerType)
-    {
-        Debug.Log("SpawnObject!");
-        Transform prefab;
-        switch (playerType)
-        {
-            default:
-            case GameManager.PlayerType.Cross:
-                prefab = crossPrefab;
-                break;
-            case GameManager.PlayerType.Circle:
-                prefab = circlePrefab;
-                break;
-        }
+    //[Rpc(SendTo.Server)]
+    //private void SpawnObjectRpc(int x, int y, GameManager.PlayerType playerType)
+    //{
+    //    Debug.Log("SpawnObject!");
+    //    Transform prefab;
+    //    switch (playerType)
+    //    {
+    //        default:
+    //        case GameManager.PlayerType.Cross:
+    //            prefab = crossPrefab;
+    //            break;
+    //        case GameManager.PlayerType.Circle:
+    //            prefab = circlePrefab;
+    //            break;
+    //    }
          
-        Transform spawnedCrossTransform = Instantiate(prefab, GetGridWorldPosition(x, y), Quaternion.identity);
-        spawnedCrossTransform.GetComponent<NetworkObject>().Spawn(true);
+    //    Transform spawnedCrossTransform = Instantiate(prefab, GetGridWorldPosition(x, y), Quaternion.identity);
+    //    spawnedCrossTransform.GetComponent<NetworkObject>().Spawn(true);
 
-        visualGameObjectList.Add(spawnedCrossTransform.gameObject);
-    }
+    //    visualGameObjectList.Add(spawnedCrossTransform.gameObject);
+    //}
 
 
 
